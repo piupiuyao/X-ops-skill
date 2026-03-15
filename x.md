@@ -1,27 +1,111 @@
 ---
 name: x-ops-v2
 description: |
-  X/Twitter growth system for founders. Three modules: Monitor (热点+舆论), Comment (评论引流), Post (内容生成).
+  X/Twitter growth system for founders. Four modules: Profile (账号画像), Monitor (热点+舆论), Comment (评论引流), Post (内容生成).
   Works for 0-follower cold start AND established accounts.
-  Requires OpenClaw with browser control (Chrome Relay).
+  Requires browser control (Chrome Relay) for real-time X interactions.
   Triggers: "X运营", "发帖", "评论", "热点", "舆论监控", "tweet", "X post", "X comment", "grow twitter"
 ---
 
 # X Ops v2 — Founder Growth System
 
-专为 founder 设计的 X/Twitter 增长系统。基于 @MeredithCheng22 93天 0→244粉 的真实数据。
+专为 X/Twitter 增长设计的四模块系统。
+**必须先跑 Module 0（账号画像）**，后续所有模块的质量都依赖它。
 
-## 三大模块
+---
+
+## 四大模块
 
 | 模块 | 功能 | 触发词 |
 |------|------|--------|
-| **Monitor** | 热点新闻 + 舆论监控 + 竞品追踪 | "监控", "热点", "舆论" |
+| **Profile** | 账号画像 + 声音指纹 + 内容支柱提取 | 初次分析、换 handle |
+| **Monitor** | 热点新闻 + 舆论监控 + 机会评估 | "监控", "热点", "舆论" |
 | **Comment** | Feed 浏览 + 高质量评论生成 | "评论", "互动", "comment" |
 | **Post** | 内容生成 + 草稿管理 | "发帖", "写推", "post" |
 
 ---
 
+## ⚪ Module 0: Profile（账号画像）
+
+**这是整个系统的基础。跳过它，后续三个模块的输出质量会严重下降。**
+
+### 0.1 执行流程
+
+```
+Step 1: 基本信息抓取（浏览器）
+├── 导航到 x.com/@{handle}
+├── 抓取 Bio、固定推、粉丝数、关注数、加入日期
+├── 记录账号阶段：冷启动(<500) / 成长期(500-5K) / 成熟期(5K+)
+└── 抓取最近 20 条帖子（跳过转发，只看原创）
+
+Step 2: 内容支柱识别
+├── 分析这 20 条帖子的主题分布
+├── 找出出现频率最高的 3-5 个话题领域
+├── 记录每个支柱下的代表性帖子 1-2 条
+└── 标注哪些支柱是"本人专业领域"vs"外部借势"
+
+Step 3: 声音指纹提取
+├── 句子长度：偏短（<80字符/句）/ 中等 / 偏长
+├── 语气：干货型 / 故事型 / 观点型 / 互动型
+├── 人称：I/we 为主？第三人称？
+├── Emoji 使用频率：完全不用 / 偶尔(<2) / 常用
+├── 常用词汇/短语：提取 5-10 个标志性表达
+└── 禁忌：有没有这个账号从不用的表达方式？
+
+Step 4: 高效内容分析
+├── 找出这 20 条帖子里互动率最高的 3-5 条
+├── 分析共同点：什么类型？什么钩子？
+├── 找出互动率最低的 2-3 条
+└── 分析失败原因
+
+Step 5: 独特视角识别
+├── 这个人有什么别人没有的经历 / 数据 / 角色？
+├── 他们能提供什么独家证据（亲身经历、内部数据、专业背景）？
+└── 他们的核心观点是什么？（用一句话总结）
+```
+
+### 0.2 输出格式（存入 memory，供后续模块调用）
+
+```markdown
+# 账号画像 | @{handle} | {日期}
+
+## 基本信息
+- 粉丝数: {n} → 阶段: {冷启动/成长期/成熟期}
+- Bio: {原文}
+- 定位: {一句话总结这个账号是做什么的}
+
+## 内容支柱
+1. {支柱A} — 占比约{n}% — 代表帖: "{摘要}"
+2. {支柱B} — 占比约{n}% — 代表帖: "{摘要}"
+3. {支柱C} — 占比约{n}% — 代表帖: "{摘要}"
+
+## 声音指纹
+- 句长: {短/中/长}
+- 语气: {干货型/故事型/观点型/互动型}
+- 人称: {I/we/第三人称}
+- Emoji: {不用/偶尔/常用}
+- 标志性表达: {词1}, {词2}, {词3}...
+- 避免: {这个账号不会说的话}
+
+## 高效内容规律
+- 最佳类型: {类型A（n条）}, {类型B（n条）}
+- 最佳钩子: {钩子类型}
+- 失败模式: {什么类型的内容表现差}
+
+## 独特视角
+- 独家资产: {这个人有什么独特经历/数据/背景}
+- 核心观点: {用一句话概括他们的主要立场}
+
+## 待评论/发帖注意事项
+- 话题红线: {这个账号不应该触碰的话题}
+- 竞品: {同领域的主要竞争账号}
+```
+
+---
+
 ## 🔴 Module 1: Monitor（监控）
+
+**依赖**: Module 0 的账号画像（内容支柱 + 独特视角）
 
 ### 1.1 执行流程
 
@@ -33,50 +117,78 @@ Step 1: Today's News（浏览器）
 └── 判断时效性（小时级）
 
 Step 2: Google News 补充（浏览器）
-├── 搜索 "AI marketing OR AI agent OR OpenAI OR Anthropic"
+├── 搜索关键词基于账号支柱，而非固定词
+│   → 示例：如支柱是"AI产品"，搜 "AI agent OR LLM OR {账号领域}"
 ├── 筛选 24h 内新闻
 └── 提取标题 + 来源
 
-Step 3: 热点可蹭性评估
-├── 相关度（1-5）：和你的产品/领域相关吗？
-├── 时效性：还能蹭多久？（<6h/6-24h/24-48h）
-├── 蹭法：QT/评论/借势发帖/观察不蹭
-└── 账号匹配：个人号 vs 官方号
+Step 3: 同类账号热帖扫描（浏览器）
+├── 找 2-3 个同领域账号（参考 Profile 中竞品）
+├── 查看他们最近 24h 内的帖子
+└── 记录哪些内容正在获得高互动
+
+Step 4: 机会评估（关键改进）
+├── 相关度：这个热点是否落在账号的内容支柱内？
+├── 差异性：我们能不能说一个别人没说过的角度？
+│   → 对比已有评论/帖子，确认视角是新的
+├── 可信度：这个账号说这个话，有资格/背景吗？
+│   → 对照 Profile 中"独家资产"
+├── 时效性：还能蹭多久？（<6h / 6-24h / 24-48h）
+└── 蹭法：QT / 评论 / 借势发帖 / 观察不蹭
 ```
 
-### 1.2 热点评估矩阵
+### 1.2 机会评估矩阵（个性化版本）
 
-| 类型 | 相关度 | 推荐动作 |
-|------|--------|----------|
-| 大厂发布（OpenAI/Anthropic/Google） | ⭐⭐⭐⭐⭐ | QT + 独特观点 |
-| 行业融资/收购 | ⭐⭐⭐⭐ | 评论或借势发帖 |
-| KOL 争议/热门讨论 | ⭐⭐⭐ | 评论（如果有独特视角） |
-| 政策/监管 | ⭐⭐ | 观察为主 |
-| 无关娱乐/政治 | ⭐ | 跳过 |
+不再使用固定的 5 档类型评分，改为基于账号的动态评估：
+
+| 评估维度 | 高分条件 | 低分条件 |
+|---------|----------|----------|
+| **支柱匹配** | 直接命中账号的 1-2 个核心支柱 | 与任何支柱无关 |
+| **视角独特性** | 该账号能说一个别人没说的角度 | 已有100条帖子说同样的话 |
+| **可信度** | 账号有亲身经历/数据支撑 | 需要靠猜测或通用观点 |
+| **时效性** | <6小时 | >24小时 |
+
+**高优先级信号（同时满足以下条件）：**
+- 支柱匹配 ✅ + 视角独特 ✅ + 时效性好 ✅ → 立即行动
+- 支柱匹配 ✅ + 有可信度 ✅ → 值得发帖
+- 仅支柱匹配，无独特角度 → 只评论，不发帖
+
+**跳过信号：**
+- 与任何内容支柱无关
+- 政治/争议话题
+- 已有过多同质内容（>50 帖子说同样角度）
 
 ### 1.3 输出格式
 
 ```markdown
 # 🔥 热点监控报告 | YYYY-MM-DD HH:MM
 
-## Today's News（X 平台）
-| 热点 | 帖子数 | 时效 | 相关度 | 蹭法 |
-|------|--------|------|--------|------|
-| ... | ... | ... | ... | ... |
+## 账号: @{handle} | 内容支柱: {支柱A}, {支柱B}, {支柱C}
 
-## Google News（24h）
-| 标题 | 来源 | 相关度 | 角度建议 |
-|------|------|--------|----------|
-| ... | ... | ... | ... |
+## 今日热点
 
-## 📌 推荐行动
-1. [热点A] — QT @xxx，角度：...
-2. [热点B] — 借势发帖，切入点：...
+| 热点 | 时效 | 支柱匹配 | 独特角度 | 推荐行动 |
+|------|------|----------|----------|----------|
+| {热点A} | <3h | ✅ {支柱名} | {一句话角度} | QT + 原创观点 |
+| {热点B} | 8h | ✅ {支柱名} | ⚠️ 角度一般 | 评论即可 |
+| {热点C} | 2h | ❌ 不相关 | — | 跳过 |
+
+## 同领域账号热帖
+| 账号 | 内容摘要 | 互动 | 可借鉴点 |
+|------|---------|------|---------|
+| @{竞品账号} | {摘要} | {互动数} | {借鉴方向} |
+
+## 📌 今日行动建议（按优先级）
+1. **立即** — {热点A}：{具体操作}，角度："{建议角度}"
+2. **2小时内** — {热点B}：{具体操作}
+3. **观察** — {热点C}：不蹭，但下周可以写相关原创
 ```
 
 ---
 
 ## 🟡 Module 2: Comment（评论）
+
+**依赖**: Module 0 的账号画像（声音指纹 + 独家资产 + 内容支柱）
 
 ### 2.1 执行流程
 
@@ -89,11 +201,13 @@ Step 1: 浏览 Feed（浏览器）
 
 Step 2: 筛选高质量帖子
 ├── 符合选帖标准（见下）
-├── 话题相关（AI/Marketing/Founder/Startup）
+├── 话题必须落在账号的内容支柱内（关键过滤）
 └── 输出 5-10 条待评论
 
-Step 3: 生成评论草稿
-├── 每条帖子 1-2 个评论版本
+Step 3: 评论草稿生成（关键改进）
+├── 每条帖子生成 1-2 个评论草稿
+├── 必须基于账号的独家资产（真实经历/数据/背景）
+├── 匹配账号的声音指纹
 ├── 符合评论质量规则
 └── 标注评论类型
 
@@ -127,38 +241,59 @@ Step 4: 用户审批 + 执行
 - 评论 >200 条
 - 发布 >12小时
 - 政治/争议话题
+- 话题超出账号内容支柱范围（不要为了评论而评论）
 
-### 2.3 评论模板库
+### 2.3 评论生成规则（核心改进）
+
+**第一原则：评论必须有"只有这个账号能说的内容"**
+
+写评论之前先问：
+> 这条评论如果换一个人发，还能说吗？
+> 如果答案是"是的，任何人都能这么写" → 重写
+
+**评论类型库：**
 
 **Type A: 增量价值（最佳）**
+基于账号的真实经历或产品数据：
 ```
-We tested this at [公司] — [具体发现].
-Key insight: [一句话总结].
+[账号独家资产中的具体数据或发现].
+[一句话总结这个发现意味着什么].
 ```
+> 示例（账号是 AI 工具创始人）：
+> "We saw this with our users — 73% of the time when someone says they 'tried AI for marketing,' they mean they used ChatGPT once and it gave them a generic email.
+> The setup cost is the hidden variable nobody talks about."
 
-**Type B: 数据补充**
+**Type B: 数据反差**
 ```
-Interesting. Our data shows [具体数字]% of [用户群] actually [行为].
-The gap is [洞察].
+[原帖核心论点]. But our [具体来源] shows [不同结论].
+[为什么会有这个差异的一句话假设].
 ```
+> 仅在账号真的有这个数据时使用，不要编造
 
-**Type C: 反直觉**
+**Type C: 反直觉观点**
 ```
-Counterpoint: we found the opposite.
-[具体例子]. Might be because [原因猜测].
+Counterpoint: [与原帖不同的结论].
+[具体例子或依据]. [一句话原因].
 ```
 
 **Type D: 问题延伸**
 ```
-This makes me wonder: if [前提] is true, does [推论] follow?
-We've seen [相关经验] but never connected the dots.
+This makes me wonder: if [前提] is true, [推论]?
+We've seen [相关观察] but haven't figured out why yet.
 ```
 
-**Type E: Build in Public**
+**Type E: Build in Public（真实挣扎）**
 ```
-Going through this exact thing right now.
-[具体情况]. Still figuring out [挑战].
+Going through this right now.
+[具体情况 — 必须真实]. Still figuring out [挑战].
 ```
+> 仅用真实发生的事情，不要编造
+
+**声音指纹匹配检查（生成后过滤）：**
+- 句子长度是否匹配账号习惯？
+- Emoji 使用是否符合账号风格？
+- 语气是否一致（干货型账号不写感性内容）？
+- 是否用了账号的标志性词汇？
 
 ### 2.4 评论禁用词
 
@@ -169,25 +304,30 @@ Going through this exact thing right now.
 - "DM me"
 - 纯 emoji 回复
 - "As a [身份], I think..."
+- 任何通用观点（如果删掉"我是谁"还能说，就是通用的）
 
 ### 2.5 输出格式
 
 ```markdown
 # 💬 评论任务 | YYYY-MM-DD HH:MM
 
-## 待评论帖子
+## 账号: @{handle} | 声音: {语气类型} | 独家资产: {一句话概括}
 
-### 1. @author_handle
-**内容**: [帖子摘要]
-**数据**: 👁️ 12K | ❤️ 234 | 💬 18 | ⏰ 45min ago
+---
+
+### 1. @{作者}
+**内容**: {帖子摘要}
+**数据**: 👁️ {views} | ❤️ {likes} | 💬 {评论数} | ⏰ {时间}
 **链接**: https://x.com/...
+**话题落点**: {命中账号哪个内容支柱}
 
-**评论草稿 A** (增量价值):
-> We tested this at Karis — found that X outperformed Y by 40%.
-> The trick was focusing on [具体点].
+**评论草稿 A** ({评论类型}) — 基于 {独家资产依据}:
+> {评论内容}
 
-**评论草稿 B** (问题延伸):
-> This makes me wonder: if agents can do X, why are we still manually doing Y?
+**评论草稿 B** ({评论类型}):
+> {评论内容}
+
+**声音检查**: ✅ 匹配 / ⚠️ 注意 {问题}
 
 ---
 
@@ -196,13 +336,15 @@ Going through this exact thing right now.
 ---
 
 ## ⏳ 等待审批
-回复序号执行评论（如: 1,3,5）
-回复 "跳过" 取消
+回复序号执行评论（如: 1A, 2B, 3A）
+回复 "改{序号}" + 反馈修改
 ```
 
 ---
 
 ## 🟢 Module 3: Post（发帖）
+
+**依赖**: Module 0（账号画像）+ Module 1（当日热点，可选）
 
 ### 3.1 账号阶段判断
 
@@ -225,9 +367,31 @@ Going through this exact thing right now.
 | **Question** | ⭐⭐⭐ | 所有 | "Founders: how do you handle X?" |
 | **Thread** | ⭐⭐⭐ | 成熟期 | "I analyzed 100 founder posts. Here's what I found:" |
 
-### 3.3 Hook 公式（首行）
+### 3.3 发帖生成规则（核心改进）
 
-首行必须用以下之一：
+**第一步：选题来源确认**
+
+按优先级选题：
+1. **账号独家资产** — 本人有数据/经历/观察
+2. **今日热点 × 账号视角** — 热点落在内容支柱内，且有独特角度
+3. **读者痛点** — 账号受众经常提的问题/挣扎
+4. **内容支柱深挖** — 对某个支柱做更深的思考
+
+**绝对不选：**
+- 通用观点（任何人都能写）
+- 与内容支柱无关的话题
+- 已经有很多人写了且没有新角度的话题
+
+**第二步：角度验证**
+
+写帖之前先回答：
+> 1. 这个角度只有 @{handle} 能说吗？为什么？
+> 2. 读者看完以后会学到什么 / 感受到什么？
+> 3. 第一行能单独让人想看下去吗？
+
+**第三步：Hook 公式（首行）**
+
+必须用以下之一：
 
 1. **数字开头**: "47% of startups fail because..."
 2. **对比/反直觉**: "Everyone says X. The data shows Y."
@@ -235,6 +399,14 @@ Going through this exact thing right now.
 4. **问题**: "Why do 90% of AI tools feel the same?"
 5. **大胆声明**: "Cold email is dead."
 6. **故事开头**: "A customer just told me something wild."
+
+**第四步：声音指纹匹配**
+
+生成内容后对照账号声音指纹：
+- 句长是否匹配？
+- Emoji 使用是否一致？
+- 语气是否匹配（干货型 vs 故事型 vs 观点型）？
+- 有没有用到账号的标志性表达？
 
 ### 3.4 长度规则
 
@@ -280,42 +452,44 @@ Going through this exact thing right now.
 ```markdown
 # ✍️ 发帖草稿 | YYYY-MM-DD
 
-## 选题来源
-- [ ] 今日热点
-- [ ] 用户痛点库
-- [ ] Build in Public
-- [ ] 数据/洞察
-
-## 草稿
-
-### 版本 A (QT 热点)
-> [Quote @xxx 的帖子]
-> 
-> This is exactly why we built Karis differently.
-> Most AI tools wait for prompts. Ours monitors and acts.
-> The shift from "assistant" to "agent" is everything.
-
-**类型**: QT 热点
-**字符**: 156
-**Hook**: 对比型
+## 账号: @{handle}
+## 选题来源: {独家资产/热点借势/读者痛点/支柱深挖}
+## 角度独特性: {为什么只有这个账号能这样写}
 
 ---
 
-### 版本 B (Build in Public)
-> Shipped our new monitoring feature at 2am.
-> Broke prod twice.
-> Fixed it by 6am.
-> 
-> This is the founder life nobody talks about.
+### 版本 A ({内容类型})
 
-**类型**: Build in Public  
-**字符**: 112
-**Hook**: 故事型
+> {帖子内容}
+
+**类型**: {类型}
+**字符**: {n}
+**Hook**: {钩子类型}
+**声音匹配**: ✅ / ⚠️ {问题}
+**独家资产使用**: {用了什么独特内容}
 
 ---
 
-## 📌 推荐
-版本 A — 蹭今日热点，时效性强
+### 版本 B ({内容类型})
+
+> {帖子内容}
+
+**类型**: {类型}
+**字符**: {n}
+**Hook**: {钩子类型}
+**声音匹配**: ✅ / ⚠️ {问题}
+
+---
+
+## 发帖前检查
+- [ ] 第一行能独立让人想看下去？
+- [ ] 有具体数据或真实故事？
+- [ ] 没有禁用词？
+- [ ] 声音匹配 @{handle}？
+- [ ] 这个角度只有这个账号能说？
+
+## 📌 推荐版本
+版本 {A/B} — {推荐理由}
 
 ## ⏳ 等待审批
 回复 A/B 选择版本
@@ -326,27 +500,44 @@ Going through this exact thing right now.
 
 ## 执行命令
 
-### 完整日常流程
+### 首次使用（必须）
+
 ```
-用户: "跑一下 X 监控"
+用户: "帮我运营 @{handle}"
 
 执行顺序:
-1. Monitor — 热点 + 舆论
-2. Comment — Feed 评论建议
-3. Post — 基于热点生成草稿
-4. 汇总报告 + 等待审批
+1. Profile — 生成账号画像（存入 memory）
+2. Monitor — 热点 + 机会评估
+3. Comment — Feed 评论建议（基于画像匹配）
+4. Post — 基于热点 + 画像生成草稿
+5. 汇总报告 + 等待审批
 ```
 
-### 单模块执行
+### 日常执行（画像已有）
+
 ```
-"跑热点监控" → Module 1 only
-"找评论机会" → Module 2 only  
+"跑 X 监控" → Monitor + Comment + Post
+"找评论机会" → Module 2 only
 "帮我写推" → Module 3 only
+"刷新画像" → Module 0 重新执行
+```
+
+### 边缘情况处理
+
+```
+如果账号是新号（0条原创帖）:
+→ 跳过声音指纹提取
+→ 询问用户：目标受众是谁？擅长领域是什么？有哪些真实经历可以用？
+→ 用用户回答填充 Profile
+
+如果话题超出内容支柱:
+→ 提醒用户：这个话题不在账号核心领域，评论/发帖可能显得不真实
+→ 询问是否继续
 ```
 
 ---
 
-## 文件路径
+## 文件路径（参考）
 
 ```
 ~/Desktop/test/素材库/
@@ -367,11 +558,11 @@ Going through this exact thing right now.
 
 ## 参考文档
 
-- [references/data-evidence.md](references/data-evidence.md) — 93天数据证明
+- [post-examples.md](post-examples.md) — 爆款帖子拆解（含失败案例）
 - [references/comment-templates.md](references/comment-templates.md) — 评论模板扩展
-- [references/post-examples.md](references/post-examples.md) — 爆款帖子拆解
 - [references/voice-guide.md](references/voice-guide.md) — 语气指南
+- [references/data-evidence.md](references/data-evidence.md) — 93天数据证明
 
 ---
 
-*基于 @MeredithCheng22 真实数据构建 | 仅限 OpenClaw 使用*
+*基于 @MeredithCheng22 真实数据构建 | v2 新增账号画像模块*
