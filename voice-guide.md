@@ -115,6 +115,23 @@ AI 生成内容最常见的失败：**生成的内容质量还行，但不像这
 
 以下表达是 AI 生成内容的典型特征，任何账号都不该出现：
 
+**格式性 AI 腔（最暴露的几个）：**
+
+| 问题 | AI 写法 | 人写法 |
+|------|---------|--------|
+| Em dash | "users — especially early ones — churn fast" | "early users churn fast" 或直接拆句 |
+| 斜体强调 | "*this* is the key insight" | 不用，直接说 |
+| 加粗强调（评论里）| "**The real problem** is..." | 不用，直接说 |
+| 标点后不加空格 | "users.they want" | "users. They want" |
+| 首字母大写过度整齐 | 每句都严格首字母大写，像报告 | 根据账号风格，casual 账号可以全小写 |
+| 列表化 | "Three things: 1. X 2. Y 3. Z" | 直接说，或换行分句 |
+| 分号 | "users want control; they don't want agents" | "users want control. Not agents." |
+
+**长度 AI 腔（评论专项）：**
+- AI 倾向于写 4-6 句评论，真人写 2-3 句
+- AI 喜欢有"开头 + 论点 + 总结"的完整结构，真人直接进入论点
+- 评论超过 3 句就要问：能删掉哪句？
+
 **结构性 AI 腔：**
 - "Let me break this down..."
 - "Here are 5 key takeaways:"
@@ -133,11 +150,6 @@ AI 生成内容最常见的失败：**生成的内容质量还行，但不像这
 - "It's complex and multifaceted"
 - "As we navigate this evolving landscape"
 - 任何无立场的中性陈述（AI 怕得罪人）
-
-**格式性 AI 腔：**
-- 回复里用 **加粗** 强调词（真人不这么写评论）
-- 过度使用分号
-- 每段结尾都有总结句
 
 ---
 
